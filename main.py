@@ -53,7 +53,7 @@ def listAllEpisodes():
         print('{:<3}'.format(str(r[0])), r[2], '{:>8}'.format(r[3]), r[1])
     con.close()
 
-def printEpisodesDetailed(query,desc):
+def printEpisodesDetailed(query,desc=2):
     '''
     This function prints a list of episodes with corresponding hosts and movies/videos, according to a user-made query
     :param query: string, the sql query, which is necessarily one that returns entries in the episodes table
@@ -92,7 +92,6 @@ def printEpisodesDetailed(query,desc):
         print(hostsList)
 
         # Executes a query for the movies/videos featured
-        moviesList = 'Movies/videos watched: \n'
         cursor2.execute('select m.title, m.year, m.director from movies m join episodes e on m.episode = e.number where e.number = ' + str(r[0]))
         moviesQuery = cursor2.fetchall()
 
@@ -104,7 +103,7 @@ def printEpisodesDetailed(query,desc):
                 line = line + ' (' + str(m[1]) + ') '
             if m[2] != None:
                 line = line + 'Dir. ' + m[2]
-            print(line)
+            print(line,'\n')
 
         if desc == 1: # Episode description, if requested, is printed in a separate line at the end
             print('Description: \n' + r[-1] + '\n') 
@@ -114,7 +113,7 @@ def lookForEpisode():
     '''
     Handles option 2 in the main menu, when user wants to look up a specific episode
     '''
-    ep = input('\nType episode number or title (doesn''t have to be the full title)\n')
+    ep = input('\nType episode number or title (doesn\'t have to be the full title)\n')
     desc = 0
     while desc != 1 and desc != 2:
         desc = int(input('Press 1 to include description in results, 2 to not include it'))
@@ -135,24 +134,47 @@ def lookForEpisode():
     print('')
     printEpisodesDetailed(query,desc)
 
-def printMovies(query,order):
+def printMovies(query,order=1):
     '''
     Function that prints out a movie or list of movies, according to a user-made query
-    :param query: a sql query that returns entries in the movies table
+    :param query: string, a sql query that returns entries in the movies table
+    :param order: integer, 1 is by title, 2 by episode, 3 by year, 4 by director
     '''
     con = sqlite3.connect('botw.db')
     cursor = con.cursor()
     cursor.execute(query)
     rows = cursor.fetchall()
 
-    for r in rows:
-        line = r[0] + ' '
-        if r[1] != None:
-            line = line +  ' (' + str(r[1]) + ') '
-        if r[2] != None:
-            line = line + 'Dir. ' + r[2] + ' '
-        line = line + '(ep. ' + str(r[3]) +')'
-        print(line)        
+    print(len(rows), ' results found.')
+    # Query order is title, year, director, episode
+    if order == 1: # By title
+        for r in rows:
+            line = r[0]
+            if r[1] != None:
+                line = line +  ' (' + str(r[1]) + ')'
+            if r[2] != None:
+                line = line + ' Dir. ' + r[2]
+            print(line + ' (ep. ' + str(r[3]) +')')
+    elif order == 2: # By episode
+        for r in rows:
+            line = 'Ep. ' + str(r[3]) + ' - ' + r[0]
+            if r[1] != None:
+                line = line +  ' (' + str(r[1]) + ')'
+            if r[2] != None:
+                line = line + ' Dir. ' + r[2]
+            print(line)
+    elif order == 3: # By year
+        for r in rows:
+            line = str(r[1]) + ' ' + r[0]
+            if r[2] != None:
+                line = line + ' (Dir. ' + r[2] + ')'
+            print(line + ' (ep. ' + str(r[3]) + ')')
+    elif order == 4: # By director
+        for r in rows:
+            line = r[2] + ' - ' + r[0]
+            if r[1] != None:
+                line = line + ' (' + str(r[1]) + ')'
+            print(line + ' (ep. ' + str(r[3]) + ')')
     con.close()
 
 def listAllMovies():
@@ -185,6 +207,13 @@ def listAllMovies():
         print('\nThe following ones have unknown directors:\n')
         printMovies('SELECT title, year, director, episode FROM movies WHERE director is null ORDER BY title',1)
 
+def lookForMovie():
+    '''
+    Handles option 4 on the main menu, looking for movies by title
+    '''
+    mov = input('Enter movie title to find: ')
+    printMovies(query='SELECT title, year, director, episode FROM movies WHERE title like \'%' + mov + '%\' ORDER BY title')
+
 def main():
     while(True):
         menuPrint()
@@ -199,5 +228,7 @@ def main():
             lookForEpisode()
         elif op == 3:
             listAllMovies()
+        elif op == 4:
+            lookForMovie()
 
 main()
