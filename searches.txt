@@ -1,0 +1,90 @@
+-- List movies from a specific episode, by number
+SELECT e.number, e.title, e.upload, m.director, m.title, m.year
+FROM movies m JOIN episodes e on m.episode = e.number
+where e.number = 100 ;
+
+-- List movies from a specific episode, by title
+SELECT e.number, e.title, e.upload, m.director, m.title, m.year
+FROM movies m JOIN episodes e on m.episode = e.number
+where e.title like '%wheel of the worst #12%';
+
+-- List movies from specific gimmick episodes 
+SELECT e.number, e.title, e.upload, m.title
+FROM episodes e join movies m on m.episode = e.number
+where e.title like '%wheel%'
+
+-- List hosts by number of appearances
+SELECT p.name as host, count(h.p_id) as appearances
+from hosts_episodes h join people p on h.p_id = p.p_id
+GROUP BY h.p_id
+order by appearances DESC
+
+-- Find a specific director
+SELECT e.number as episode, e.title, m.title as movie 
+FROM movies m JOIN episodes e on m.episode = e.number
+where m.director like 'albert pyun'  ;
+SELECT e.number as episode, e.upload, e.title, m.title as movie, m.director 
+FROM movies m JOIN episodes e on m.episode = e.number
+where m.director like '%breen%'  ;
+
+-- List most featured directors
+SELECT m.director, count(DISTINCT m.title) as 'movies featured'
+FROM movies m
+GROUP by m.director
+order by count(DISTINCT m.title) DESC
+
+-- Find hosts of a specific episode
+SELECT p.name 
+from people p join hosts_episodes h JOIN episodes e 
+on	h.p_id = p.p_id and h.ep_number = e.number
+where e.number = 113
+
+-- Find all episodes with a specific host
+SELECT e.number, e.title, e.upload 
+from people p join hosts_episodes h JOIN episodes e 
+on	h.p_id = p.p_id and h.ep_number = e.number
+where p.name like '%culkin%'
+
+-- List all episodes featuring a specific combination of hosts
+SELECT e.number, e.title, e.upload 
+from people p join hosts_episodes h JOIN episodes e 
+on	h.p_id = p.p_id and h.ep_number = e.number 
+where p.name like '%colin%'
+INTERSECT
+SELECT e.number, e.title, e.upload 
+from people p join hosts_episodes h JOIN episodes e 
+on	h.p_id = p.p_id and h.ep_number = e.number 
+where p.name like '%jim%'
+
+-- List all episodes not containing a specific host
+-- SELECT count(DISTINCT e.number) 
+SELECT DISTINCT e.number, e.title, e.upload 
+from people p join hosts_episodes h JOIN episodes e 
+on	h.p_id = p.p_id and h.ep_number = e.number 
+where e.number not in (
+	SELECT e.number
+	from people p join hosts_episodes h JOIN episodes e 
+	on	h.p_id = p.p_id and h.ep_number = e.number 
+	where p.name like '%rich%')
+;
+
+-- List all episodes over an hour long
+SELECT e.number, e.title, e.upload, e.length 
+from episodes e 
+where e.length like '01:%' ;
+
+-- List editors by amount of episodes
+SELECT p.name as editor, count(DISTINCT(e.number)) as 'edited episodes'
+from people p join episodes e on p.p_id = e.editor
+GROUP by p.name
+order by 'edited episodes' DESC ;
+
+-- List episodes from a specific year
+SELECT e.number, e.title, e.upload, e.length 
+from episodes e 
+where e.upload like '%/19' ;
+
+-- List all christmas episodes (actually pulls up some false positives, idc)
+SELECT e.number, e.title, e.upload, e.length 
+from episodes e 
+where e.upload like '2%/12/%' or e.title like '%christmas%' ;
