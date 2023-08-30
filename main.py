@@ -103,7 +103,8 @@ def printEpisodesDetailed(query,desc=2):
                 line = line + ' (' + str(m[1]) + ') '
             if m[2] != None:
                 line = line + 'Dir. ' + m[2]
-            print(line,'\n')
+            print(line)
+        print('\n')
 
         if desc == 1: # Episode description, if requested, is printed in a separate line at the end
             print('Description: \n' + r[-1] + '\n') 
@@ -212,7 +213,28 @@ def lookForMovie():
     Handles option 4 on the main menu, looking for movies by title
     '''
     mov = input('Enter movie title to find: ')
-    printMovies(query='SELECT title, year, director, episode FROM movies WHERE title like \'%' + mov + '%\' ORDER BY title')
+    print('\n')
+    printMovies(query='SELECT title, year, director, episode FROM movies WHERE title like \'%' + str(mov) + '%\' ORDER BY title')
+
+def lookForDirector():
+    '''
+    Handles option 5 on the main menu, looking for directors featured on the show
+    '''
+    director = input('Enter director name: ')
+    print('\n')
+    printMovies(query='SELECT title, year, director, episode FROM movies WHERE director like \'%' + str(director) + '%\' ORDER BY title')
+
+def lookForHosts():
+    '''
+    Handles option 6 on the main menu, looking for a host or combination of hosts
+    '''
+    hosts = input('Type in the host(s) (if more than one, separate with a space, ex. "Rich Mike"):').split()
+    query = 'SELECT e.number, e.title, e.upload from people p join hosts_episodes h JOIN episodes e on h.p_id = p.p_id and h.ep_number = e.number where p.name like \'%' + str(hosts[0]) + '%\''
+    if len(hosts) > 1:
+        for i in range(1,len(hosts)):
+            query = query + 'INTERSECT SELECT e.number, e.title, e.upload from people p join hosts_episodes h JOIN episodes e on h.p_id = p.p_id and h.ep_number = e.number where p.name like \'%' + str(hosts[i]) + '%\''
+    print('\n')
+    printEpisodesDetailed(query=query)
 
 def main():
     while(True):
@@ -230,5 +252,9 @@ def main():
             listAllMovies()
         elif op == 4:
             lookForMovie()
+        elif op == 5:
+            lookForDirector()
+        elif op == 6:
+            lookForHosts()
 
 main()
