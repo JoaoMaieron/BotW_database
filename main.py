@@ -104,10 +104,10 @@ def printEpisodesDetailed(query,desc=2):
             if m[2] != None:
                 line = line + 'Dir. ' + m[2]
             print(line)
-        print('\n')
-
+        if desc == 2:
+            print()
         if desc == 1: # Episode description, if requested, is printed in a separate line at the end
-            print('Description: \n' + r[-1] + '\n') 
+            print('Description: \n', r[-1], '\n')
     con.close()
 
 def lookForEpisode():
