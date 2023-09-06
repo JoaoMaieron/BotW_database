@@ -88,3 +88,33 @@ where e.upload like '%/19' ;
 SELECT e.number, e.title, e.upload, e.length 
 from episodes e 
 where e.upload like '2%/12/%' or e.title like '%christmas%' ;
+
+-- Episode count by year
+select 
+CASE
+	when upload like '%13' then '2013'
+	when upload like '%14' then '2014'
+	when upload like '%15' then '2015'
+	when upload like '%16' then '2016'
+	when upload like '%17' then '2017'
+	when upload like '%18' then '2018'
+	when upload like '%19' then '2019'
+	when upload like '%20' then '2020'
+	when upload like '%21' then '2021'
+	when upload like '%22' then '2022'
+	when upload like '%23' then '2023'
+END as upload_year, count(*) as total_episodes
+FROM episodes
+GROUP by CASE
+	when upload like '%13' then '2013'
+	when upload like '%14' then '2014'
+	when upload like '%15' then '2015'
+	when upload like '%16' then '2016'
+	when upload like '%17' then '2017'
+	when upload like '%18' then '2018'
+	when upload like '%19' then '2019'
+	when upload like '%20' then '2020'
+	when upload like '%21' then '2021'
+	when upload like '%22' then '2022'
+	when upload like '%23' then '2023'
+	END
